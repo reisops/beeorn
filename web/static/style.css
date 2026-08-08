@@ -1,0 +1,50 @@
+body {
+  font-family: sans-serif;
+  background: #fdf6e3;
+  text-align: center;
+  padding: 20px;
+}
+#hive-canvas {
+  background: #eee;
+  border: 4px solid #6b4423;
+  border-radius: 8px;
+}
+#status-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.status-normal { background: #b7e4a3; }
+.status-atencao { background: #f5d76e; }
+.status-alerta { background: #f28b82; }
+#metrics span {
+  display: inline-block;
+  margin: 10px 16px;
+  font-size: 1em;
+}
+#composition {
+  max-width: 420px;
+  margin: 20px auto;
+  text-align: left;
+}
+.comp-row {
+  display: flex;
+  align-items: center;
+  margin: 4px 0;
+  font-size: 0.9em;
+}
+.comp-label { width: 90px; }
+.comp-bar-bg {
+  flex: 1;
+  background: #eee;
+  border-radius: 4px;
+  height: 14px;
+  margin: 0 8px;
+  overflow: hidden;
+}
+.comp-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+}

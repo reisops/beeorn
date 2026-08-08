@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Beeorn — Colmeia Virtual</title>
+  <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+  <h1>🐝 Beeorn — Hive 01</h1>
+  <div id="status-badge">Carregando...</div>
+
+  <canvas id="hive-canvas" width="500" height="560"></canvas>
+
+  <div id="metrics">
+    <span>Peso total: <b id="weight">--</b></span>
+    <span>Temp (ninho): <b id="temp">--</b></span>
+    <span>Umidade: <b id="humidity">--</b></span>
+    <span>População: <b id="population">--</b></span>
+  </div>
+
+  <div id="composition">
+    <h3>Composição do peso</h3>
+    <div id="comp-bars"></div>
+  </div>
+
+  <script src="static/hive.js"></script>
+</body>
+</html>

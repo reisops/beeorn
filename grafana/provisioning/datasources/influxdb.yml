@@ -1,0 +1,15 @@
+apiVersion: 1
+
+datasources:
+  - name: InfluxDB-BeeBee
+    type: influxdb
+    access: proxy
+    url: http://influxdb:8086
+    jsonData:
+      version: Flux
+      organization: beebee-org
+      defaultBucket: hive-data
+      tlsSkipVerify: true
+    secureJsonData:
+      token: beebee-super-secret-token
+    isDefault: true

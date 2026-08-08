@@ -1,0 +1,7 @@
+simulator/venv/
+api/venv/
+__pycache__/
+*.pyc
+.env
+mosquitto/data/
+mosquitto/log/

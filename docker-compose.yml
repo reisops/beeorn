@@ -1,0 +1,93 @@
+version: "3.8"
+
+services:
+  influxdb:
+    image: docker.io/library/influxdb:2.7
+    container_name: beebee-influxdb
+    ports:
+      - "8086:8086"
+    env_file: .env
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=beebee12345
+      - DOCKER_INFLUXDB_INIT_ORG=beebee-org
+      - DOCKER_INFLUXDB_INIT_BUCKET=hive-data
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=beebee-super-secret-token
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+
+  grafana:
+    image: docker.io/grafana/grafana:11.0.0
+    container_name: beebee-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=beebee12345
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:Z
+    depends_on:
+      - influxdb
+
+  mosquitto:
+    image: docker.io/eclipse-mosquitto:2.0
+    container_name: beebee-mosquitto
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto/config:/mosquitto/config:Z
+      - ./mosquitto/data:/mosquitto/data:Z
+      - ./mosquitto/log:/mosquitto/log:Z
+
+  simulator:
+    build: ./simulator
+    container_name: beebee-simulator
+    env_file: .env
+    environment:
+      - HIVE_ID=hive-01
+    depends_on:
+      - mosquitto
+    restart: unless-stopped
+
+  simulator-2:
+    build: ./simulator
+    container_name: beebee-simulator-2
+    env_file: .env
+    environment:
+      - HIVE_ID=hive-02
+    depends_on:
+      - mosquitto
+    restart: unless-stopped
+
+  ingestor:
+    build: ./ingestor
+    container_name: beebee-ingestor
+    env_file: .env
+    depends_on:
+      - mosquitto
+      - influxdb
+    restart: unless-stopped
+
+  api:
+    build: ./api
+    container_name: beebee-api
+    env_file: .env
+    ports:
+      - "5000:5000"
+    depends_on:
+      - influxdb
+    restart: unless-stopped
+
+  web:
+    build: ./web
+    container_name: beebee-web
+    ports:
+      - "8000:8000"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  influxdb-data:
+  grafana-data:
