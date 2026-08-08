@@ -16,43 +16,62 @@ The project's focus is deliberately on **infrastructure, observability, and dist
 
 ## Architecture
 
-┌─────────────┐ MQTT ┌────────────┐ write ┌───────────┐
-│ Simulator │ ────────────▶ │ Mosquitto │ ─────────────▶ │ Ingestor │
-│ (hive-01/02) │ publish │ (broker) │ subscribe │ │
-└─────────────┘ └────────────┘ └─────┬─────┘
-│ write
-▼
-┌────────────┐
-│ InfluxDB │
-│ (time │
-│ series) │
-└──────┬──────┘
-┌───────────────┴───────────────┐
-▼ ▼
-┌────────────┐ ┌────────────┐
-│ Flask API │ │ Grafana │
-│ │ │ (dashboards │
-└──────┬──────┘ │ + alerts) │
-▼ └────────────┘
-┌────────────┐
-│ Web hive │
-│ (animated) │
-└────────────┘
-
+```text
+┌────────────────────┐
+│     Simulator      │
+│   hive-01 / 02     │
+└─────────┬──────────┘
+          │
+          │ MQTT publish
+          ▼
+┌────────────────────┐
+│     Mosquitto      │
+│    MQTT Broker     │
+└─────────┬──────────┘
+          │
+          │ MQTT subscribe
+          ▼
+┌────────────────────┐
+│      Ingestor      │
+│  MQTT → InfluxDB   │
+└─────────┬──────────┘
+          │
+          │ write
+          ▼
+┌────────────────────┐
+│      InfluxDB      │
+│    Time Series     │
+└─────────┬──────────┘
+          │
+          ├──────────────────────┐
+          │                      │
+          ▼                      ▼
+┌────────────────────┐  ┌────────────────────┐
+│     Flask API      │  │      Grafana       │
+│                    │  │ Dashboards + Alerts│
+└─────────┬──────────┘  └────────────────────┘
+          │
+          │ REST
+          ▼
+┌────────────────────┐
+│       Web UI       │
+│  Animated Hive     │
+└────────────────────┘
+```
 
 The simulator **has no knowledge of the database** — it only publishes messages to MQTT, exactly like a physical sensor (ESP32) would. The Ingestor is the only component that talks to InfluxDB. This means replacing the simulator with real hardware requires no changes to the rest of the system.
 
 All 8 services run as containers via **Podman** (`podman-compose up -d` brings up everything):
 
-| Service | Role |
-|---|---|
-| `influxdb` | Time-series database |
-| `mosquitto` | MQTT broker |
-| `ingestor` | Subscribes to MQTT, writes to InfluxDB |
-| `simulator` / `simulator-2` | Simulate hive-01 and hive-02 |
-| `api` | Exposes data via REST (Flask) |
-| `web` | Serves the animated virtual hive |
-| `grafana` | Dashboards and alerting |
+| Service                     | Role                                   |
+| --------------------------- | -------------------------------------- |
+| `influxdb`                  | Time-series database                   |
+| `mosquitto`                 | MQTT broker                            |
+| `ingestor`                  | Subscribes to MQTT, writes to InfluxDB |
+| `simulator` / `simulator-2` | Simulate hive-01 and hive-02           |
+| `api`                       | Exposes data via REST (Flask)          |
+| `web`                       | Serves the animated virtual hive       |
+| `grafana`                   | Dashboards and alerting                |
 
 ---
 
@@ -60,12 +79,12 @@ All 8 services run as containers via **Podman** (`podman-compose up -d` brings u
 
 Fully open source, no dependency on paid services:
 
-- **Python** — simulator, ingestor, API (Flask)
-- **MQTT (Eclipse Mosquitto)** — messaging between sensor and database
-- **InfluxDB 2.7** — time-series database
-- **Grafana** — dashboards and alerting
-- **Podman + Podman Compose** — containerization (open source alternative to Docker)
-- **HTML/JS (Canvas)** — animated virtual hive
+* **Python** — simulator, ingestor, API (Flask)
+* **MQTT (Eclipse Mosquitto)** — messaging between sensor and database
+* **InfluxDB 2.7** — time-series database
+* **Grafana** — dashboards and alerting
+* **Podman + Podman Compose** — containerization (open source alternative to Docker)
+* **HTML/JS (Canvas)** — animated virtual hive
 
 ---
 
@@ -73,39 +92,34 @@ Fully open source, no dependency on paid services:
 
 Weight, temperature, and humidity aren't random numbers — they're a **consequence** of the colony's internal state:
 
-- Population, honey/pollen/nectar reserves, queen health
-- A realistic daily cycle (foragers leave in the morning, weight drops; return in the afternoon, weight rises; nectar cures into honey overnight)
-- Total weight = empty box + wax + bees + honey + pollen + nectar (all variable)
-- Random swarming event, with real impact on population and weight
+* Population, honey/pollen/nectar reserves, queen health
+* A realistic daily cycle (foragers leave in the morning, weight drops; return in the afternoon, weight rises; nectar cures into honey overnight)
+* Total weight = empty box + wax + bees + honey + pollen + nectar (all variable)
+* Random swarming event, with real impact on population and weight
 
 ---
 
 ## Screenshots
 
 ### Fleet dashboard (Grafana)
+
 "Stat" panels at the top show each hive's status at a glance (green/yellow/red by threshold); line charts below show historical trends comparing both hives.
 
-![Fleet dashboard](docs/screenshots/dashboard-frota.png)
-
 ### Virtual hive
+
 Web page with animated bees reacting to the colony's real state (activity, population, alerts).
 
-![Virtual hive](docs/screenshots/colmeia-visual.png)
-
 ### Containerized infrastructure
+
 All 8 services running via `podman-compose up -d`.
 
-![Containers running](docs/screenshots/containers-rodando.png)
-
 ### Simulator generating biological data
+
 Real-time weight, population, and device battery readings — driven by the colony's internal state, not random numbers.
 
-![Simulator logs](docs/screenshots/simulator-logs.png)
-
 ### Ingestor writing to InfluxDB
-Confirms the MQTT → InfluxDB pipeline working end to end.
 
-![Ingestor logs](docs/screenshots/ingestor-logs.png)
+Confirms the MQTT → InfluxDB pipeline working end to end.
 
 ---
 
@@ -122,9 +136,9 @@ podman-compose up -d --build
 
 Once it's up:
 
-- Grafana dashboard: `http://localhost:3000` (default login: `admin` / password set in `.env`)
-- Virtual hive: `http://localhost:8000`
-- API: `http://localhost:5000/api/hives`
+* Grafana dashboard: `http://localhost:3000` (default login: `admin` / password set in `.env`)
+* Virtual hive: `http://localhost:8000`
+* API: `http://localhost:5000/api/hives`
 
 ---
 
@@ -132,24 +146,24 @@ Once it's up:
 
 Documented because debugging these was more valuable for learning than any single piece of code:
 
-- **SELinux blocking Grafana's volume** (`permission denied` on provisioning) — fixed with the `:Z` flag on `docker-compose.yml` volumes
-- **Fedora 44 + DNF5**: the old `dnf config-manager --add-repo` syntax no longer works, and Docker CE's official repo lacked immediate support for the release — fixed by migrating to native Podman
-- **InfluxDB type conflict**: a field written as an integer in one run and as a float in another breaks writes (`422 Unprocessable Entity`) — fixed by forcing explicit `float()` on all numeric fields
-- **`localhost` inside containers**: once the Python services were containerized, `localhost` stopped pointing to the host machine — fixed by using the Compose service names instead (`mosquitto`, `influxdb`)
-- **Rebuilding an image doesn't auto-recreate the container** in Podman Compose — fixed with explicit `podman stop` + `podman rm` before bringing the new image up
-- **Misindented YAML**: a service accidentally placed under the `volumes:` section instead of `services:` — Compose fails silently with "missing services"
+* **SELinux blocking Grafana's volume** (`permission denied` on provisioning) — fixed with the `:Z` flag on `docker-compose.yml` volumes
+* **Fedora 44 + DNF5**: the old `dnf config-manager --add-repo` syntax no longer works, and Docker CE's official repo lacked immediate support for the release — fixed by migrating to native Podman
+* **InfluxDB type conflict**: a field written as an integer in one run and as a float in another breaks writes (`422 Unprocessable Entity`) — fixed by forcing explicit `float()` on all numeric fields
+* **`localhost` inside containers**: once the Python services were containerized, `localhost` stopped pointing to the host machine — fixed by using the Compose service names instead (`mosquitto`, `influxdb`)
+* **Rebuilding an image doesn't auto-recreate the container** in Podman Compose — fixed with explicit `podman stop` + `podman rm` before bringing the new image up
+* **Misindented YAML**: a service accidentally placed under the `volumes:` section instead of `services:` — Compose fails silently with "missing services"
 
 ---
 
 ## Roadmap / next steps
 
-- [ ] Validate with a real beekeeper partner (replace the simulator with ESP32 hardware + sensors)
-- [ ] CI/CD (GitHub Actions) running lint/tests on every commit
-- [ ] Unit tests for the simulator's logic
-- [ ] MQTT authentication (currently `allow_anonymous`, acceptable only in a local environment)
+* [ ] Validate with a real beekeeper partner (replace the simulator with ESP32 hardware + sensors)
+* [ ] CI/CD (GitHub Actions) running lint/tests on every commit
+* [ ] Unit tests for the simulator's logic
+* [ ] MQTT authentication (currently `allow_anonymous`, acceptable only in a local environment)
 
 ---
 
 ## Author
 
-Luis — [GitHub](https://github.com/reisops)
+Luis — [GitHub](https://github.com/reisops) | [LinkedIn](https://www.linkedin.com/in/luis-reis-ops/)
