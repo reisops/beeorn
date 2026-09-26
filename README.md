@@ -138,6 +138,7 @@ hardware without requiring changes to the downstream services.
 
   `grafana`                           Dashboards, fleet comparison, and
                                       threshold-based alerting
+                                      
   -----------------------------------------------------------------------
 
 All eight services run as containers via **Podman**.
