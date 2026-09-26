@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: Beeorn
+    orgId: 1
+    folder: Beeorn
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards

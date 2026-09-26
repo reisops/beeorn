@@ -1,6 +1,6 @@
 const canvas = document.getElementById("hive-canvas");
 const ctx = canvas.getContext("2d");
-const API_URL = "http://localhost:5000/api/hive/hive-01/status";
+const API_URL = `http://${window.location.hostname}:5000/api/hive/hive-01/status`;
 
 // --- Layout das camadas (de cima pra baixo no desenho) ---
 const LAYERS = {

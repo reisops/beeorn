@@ -1,0 +1,120 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "refresh": "10s",
+  "schemaVersion": 39,
+  "time": {"from": "now-1h", "to": "now"},
+  "title": "Beeorn — Hive Monitoring",
+  "uid": "beeorn-hive",
+  "version": 1,
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Peso da Colmeia",
+      "gridPos": {"h": 5, "w": 6, "x": 0, "y": 0},
+      "fieldConfig": {"defaults": {"unit": "kg", "decimals": 2}, "overrides": []},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}},
+      "targets": [{"refId": "A", "query": "from(bucket: \"hive-data\") |> range(start: -10m) |> filter(fn: (r) => r._measurement == \"hive_metrics\" and r.hive_id == \"hive-01\" and r._field == \"weight_kg\") |> last()"}]
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Temperatura",
+      "gridPos": {"h": 5, "w": 6, "x": 6, "y": 0},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "decimals": 1,
+          "thresholds": {"mode": "absolute", "steps": [
+            {"color": "red", "value": null},
+            {"color": "green", "value": 32},
+            {"color": "red", "value": 37}
+          ]}
+        },
+        "overrides": []
+      },
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}},
+      "targets": [{"refId": "A", "query": "from(bucket: \"hive-data\") |> range(start: -10m) |> filter(fn: (r) => r._measurement == \"hive_metrics\" and r.hive_id == \"hive-01\" and r._field == \"temp_c\") |> last()"}]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Umidade",
+      "gridPos": {"h": 5, "w": 6, "x": 12, "y": 0},
+      "fieldConfig": {"defaults": {"unit": "percent", "decimals": 1}, "overrides": []},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}},
+      "targets": [{"refId": "A", "query": "from(bucket: \"hive-data\") |> range(start: -10m) |> filter(fn: (r) => r._measurement == \"hive_metrics\" and r.hive_id == \"hive-01\" and r._field == \"humidity_pct\") |> last()"}]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "População",
+      "gridPos": {"h": 5, "w": 6, "x": 18, "y": 0},
+      "fieldConfig": {"defaults": {"unit": "short", "decimals": 0}, "overrides": []},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}},
+      "targets": [{"refId": "A", "query": "from(bucket: \"hive-data\") |> range(start: -10m) |> filter(fn: (r) => r._measurement == \"hive_metrics\" and r.hive_id == \"hive-01\" and r._field == \"population\") |> last()"}]
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Produção de Mel",
+      "gridPos": {"h": 5, "w": 6, "x": 0, "y": 5},
+      "fieldConfig": {"defaults": {"unit": "kg", "decimals": 2}, "overrides": []},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}},
+      "targets": [{"refId": "A", "query": "from(bucket: \"hive-data\") |> range(start: -10m) |> filter(fn: (r) => r._measurement == \"hive_metrics\" and r.hive_id == \"hive-01\" and r._field == \"honey_kg\") |> last()"}]
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "Bateria do Dispositivo",
+      "gridPos": {"h": 5, "w": 6, "x": 6, "y": 5},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 0,
+          "thresholds": {"mode": "absolute", "steps": [
+            {"color": "red", "value": null},
+            {"color": "orange", "value": 20},
+            {"color": "green", "value": 50}
+          ]}
+        },
+        "overrides": []
+      },
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}},
+      "targets": [{"refId": "A", "query": "from(bucket: \"hive-data\") |> range(start: -10m) |> filter(fn: (r) => r._measurement == \"hive_metrics\" and r.hive_id == \"hive-01\" and r._field == \"device_battery_pct\") |> last()"}]
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Peso ao longo do tempo",
+      "gridPos": {"h": 9, "w": 12, "x": 0, "y": 10},
+      "fieldConfig": {"defaults": {"unit": "kg", "decimals": 2}, "overrides": []},
+      "targets": [{"refId": "A", "query": "from(bucket: \"hive-data\") |> range(start: -1h) |> filter(fn: (r) => r._measurement == \"hive_metrics\" and r.hive_id == \"hive-01\" and r._field == \"weight_kg\")"}]
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Temperatura e Umidade",
+      "gridPos": {"h": 9, "w": 12, "x": 12, "y": 10},
+      "fieldConfig": {"defaults": {}, "overrides": []},
+      "targets": [{"refId": "A", "query": "from(bucket: \"hive-data\") |> range(start: -1h) |> filter(fn: (r) => r._measurement == \"hive_metrics\" and r.hive_id == \"hive-01\" and (r._field == \"temp_c\" or r._field == \"humidity_pct\") )"}]
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Mel, Pólen e Néctar",
+      "gridPos": {"h": 9, "w": 12, "x": 0, "y": 19},
+      "fieldConfig": {"defaults": {"unit": "kg", "decimals": 2}, "overrides": []},
+      "targets": [{"refId": "A", "query": "from(bucket: \"hive-data\") |> range(start: -1h) |> filter(fn: (r) => r._measurement == \"hive_metrics\" and r.hive_id == \"hive-01\" and (r._field == \"honey_kg\" or r._field == \"pollen_kg\" or r._field == \"nectar_kg\") )"}]
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Atividade da Colônia",
+      "gridPos": {"h": 9, "w": 12, "x": 12, "y": 19},
+      "fieldConfig": {"defaults": {"min": 0, "max": 1}, "overrides": []},
+      "targets": [{"refId": "A", "query": "from(bucket: \"hive-data\") |> range(start: -1h) |> filter(fn: (r) => r._measurement == \"hive_metrics\" and r.hive_id == \"hive-01\" and r._field == \"activity\")"}]
+    }
+  ]
+}

@@ -1,7 +1,22 @@
-simulator/venv/
-api/venv/
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*.egg-info/
+
+# Virtual environments
+api/venv/
+ingestor/venv/
+simulator/venv/
+
+# Environment / secrets
 .env
+
+# Mosquitto runtime data
 mosquitto/data/
 mosquitto/log/
+
+# Mosquitto credentials
+mosquitto/config/passwd
+
+# Local Mosquitto runtime
+mosquitto-runtime/

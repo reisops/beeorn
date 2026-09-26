@@ -1,5 +1,5 @@
 """
-BeeBee — Simulador de colmeia (Hive Simulator)
+Beeorn — Simulador de colmeia (Hive Simulator)
 
 EN: Simulates a beehive's biological state (population, honey, temperature...)
     and publishes readings to an MQTT broker, exactly like a real sensor would.
@@ -13,7 +13,6 @@ import random
 import math
 import json
 import logging
-import numpy as np
 from datetime import datetime, UTC
 from dotenv import load_dotenv
 import paho.mqtt.client as mqtt
@@ -25,8 +24,10 @@ load_dotenv()
 
 MQTT_HOST = os.getenv("MQTT_HOST", "localhost")
 MQTT_PORT = int(os.getenv("MQTT_PORT", "1883"))
+MQTT_USERNAME = os.getenv("MQTT_USERNAME")
+MQTT_PASSWORD = os.getenv("MQTT_PASSWORD")
 HIVE_ID = os.getenv("HIVE_ID", "hive-01")
-MQTT_TOPIC = f"beebee/hives/{HIVE_ID}/telemetry"
+MQTT_TOPIC = f"beeorn/hives/{HIVE_ID}/telemetry"
 INTERVAL_SECONDS = 10
 
 # --- Logging ---
@@ -37,7 +38,7 @@ logging.basicConfig(
     format="%(asctime)s | %(levelname)s | %(message)s",
     datefmt="%H:%M:%S",
 )
-log = logging.getLogger("beebee.simulator")
+log = logging.getLogger("beeorn.simulator")
 
 # --- Physical/biological constants ---
 # EN: Rough real-world approximations, for educational purposes.
@@ -100,7 +101,7 @@ def step():
 
     # EN: Internal temperature drifts toward a target influenced by activity.
     # PT: Temperatura interna caminha em direção a um alvo influenciado pela atividade.
-    target_temp = 34.5 + activity * 1.0 + np.random.normal(0, 0.1)
+    target_temp = 34.5 + activity * 1.0 + random.gauss(0, 0.1)
     state["hive_temp"] += (target_temp - state["hive_temp"]) * 0.3
 
     # EN: Humidity rises with fresh nectar, falls with ventilation (high activity).
@@ -143,7 +144,7 @@ def build_payload():
     """
     return {
         "hive_id": HIVE_ID,
-        "timestamp": datetime.now(UTC).isoformat() + "Z",
+        "timestamp": datetime.now(UTC).isoformat(),
         "weight_kg": round(total_weight(), 3),
         "temp_c": round(state["hive_temp"], 2),
         "humidity_pct": round(state["hive_humidity"], 2),
@@ -164,6 +165,7 @@ def main():
     # EN: Connect to the MQTT broker and start the publish loop.
     # PT: Conecta ao broker MQTT e inicia o loop de publicação.
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=f"simulator-{HIVE_ID}")
+    client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
     client.connect(MQTT_HOST, MQTT_PORT, keepalive=60)
     client.loop_start()
 

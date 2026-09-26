@@ -1,5 +1,5 @@
 """
-BeeBee — Ingestor
+Beeorn — Ingestor
 
 EN: Subscribes to MQTT hive telemetry and writes each reading into InfluxDB.
     This is the ONLY piece that knows about the database — sensors (real or
@@ -21,13 +21,15 @@ load_dotenv()
 
 MQTT_HOST = os.getenv("MQTT_HOST", "localhost")
 MQTT_PORT = int(os.getenv("MQTT_PORT", "1883"))
+MQTT_USERNAME = os.getenv("MQTT_USERNAME")
+MQTT_PASSWORD = os.getenv("MQTT_PASSWORD")
 # EN: "+" is an MQTT wildcard — matches any hive ID, already ready for multiple hives.
 # PT: "+" é um coringa MQTT — casa com qualquer ID de colmeia, já pronto pra várias colmeias.
-MQTT_TOPIC = "beebee/hives/+/telemetry"
+MQTT_TOPIC = "beeorn/hives/+/telemetry"
 
-INFLUX_URL = os.getenv("INFLUXDB_URL", "http://localhost:8086")
+INFLUX_URL = os.getenv("INFLUXDB_URL", "http://influxdb:8086")
 INFLUX_TOKEN = os.getenv("INFLUXDB_TOKEN")
-INFLUX_ORG = os.getenv("INFLUXDB_ORG", "beebee-org")
+INFLUX_ORG = os.getenv("INFLUXDB_ORG", "beeorn-org")
 INFLUX_BUCKET = os.getenv("INFLUXDB_BUCKET", "hive-data")
 
 logging.basicConfig(
@@ -35,7 +37,7 @@ logging.basicConfig(
     format="%(asctime)s | %(levelname)s | %(message)s",
     datefmt="%H:%M:%S",
 )
-log = logging.getLogger("beebee.ingestor")
+log = logging.getLogger("beeorn.ingestor")
 
 influx_client = InfluxDBClient(url=INFLUX_URL, token=INFLUX_TOKEN, org=INFLUX_ORG)
 write_api = influx_client.write_api(write_options=SYNCHRONOUS)
@@ -64,6 +66,10 @@ def on_message(client, userdata, msg):
         if "device_rssi" in data:
             point = point.field("device_rssi", int(data["device_rssi"]))
 
+        timestamp = data.get("timestamp")
+        if timestamp:
+            point = point.time(timestamp)
+
         write_api.write(bucket=INFLUX_BUCKET, org=INFLUX_ORG, record=point)
         log.info(f"Gravado: {hive_id} | peso={data.get('weight_kg')}kg")
 
@@ -72,9 +78,10 @@ def on_message(client, userdata, msg):
 
 
 def main():
-    client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id="beebee-ingestor")
+    client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id="beeorn-ingestor")
     client.on_connect = on_connect
     client.on_message = on_message
+    client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
     client.connect(MQTT_HOST, MQTT_PORT, keepalive=60)
     log.info("Ingestor iniciado.")
     client.loop_forever()
