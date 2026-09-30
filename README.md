@@ -41,6 +41,7 @@ Beeorn is built entirely on open-source technologies. There is no
 dependency on a proprietary or paid service to run the full stack
 locally:
 
+
   Layer                 Technology
   --------------------- ---------------------------------
   Language / services   Python
