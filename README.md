@@ -42,15 +42,15 @@ dependency on a proprietary or paid service to run the full stack
 locally:
 
 
-  Layer                 Technology
-  --------------------- ---------------------------------
-  Language / services   Python
-  Web API               Flask
-  Messaging             Eclipse Mosquitto (MQTT broker)
-  Storage               InfluxDB (time series)
-  Observability         Grafana
-  Containerization      Podman + Podman Compose
-  Web UI                HTML / JavaScript (Canvas)
+## Layer & Technology
+
+Language / services: Python
+Web API: Flask
+Messaging: Eclipse Mosquitto (MQTT broker)
+Storage: InfluxDB (time series)
+Observability: Grafana
+Containerization: Podman + Podman Compose
+Web UI: HTML / JavaScript (Canvas)
 
 Anyone can clone the repository and reproduce the entire environment
 locally using free and open tooling.
